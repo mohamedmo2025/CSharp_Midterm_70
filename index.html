@@ -105,8 +105,8 @@ const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const TY="int long uint ulong float double decimal string char bool byte sbyte short ushort object Console Convert Math Program".split(" "),KW="using namespace class static void const if else switch case break default new return true false var".split(" ");
 const hl=s=>esc(s).replace(/(\/\/.*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)')|\b(\d[\d.]*[fFmMuUlLdD]*)\b|\b([A-Za-z_]\w*)\b/g,(m,c,a,b,n,w)=>c?`<i class=cm>${c}</i>`:a||b?`<i class=st>${m}</i>`:n?`<i class=nu>${n}</i>`:TY.includes(w)?`<i class=ty>${w}</i>`:KW.includes(w)?`<i class=kw>${w}</i>`:m);
 const sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
-const T={en:{all:"All",ln:["Intro","Syntax","Data Types","Operators","Branching"],next:"Next ›",last:"Results ›",back:"‹ Back",ok:"Correct",no:"Wrong",ca:"Answer",th:"THEORY",co:"CODE",ex:"EXAM",rw:"Retry wrong only",rs:"Reset progress",qn:"Number of questions",qd:"Top picks by importance, spread across all 5 lectures",sub:n=>`${n} expected midterm questions · same order as the lectures`,wr:"Wrong"},
-ar:{all:"الكل",ln:["مقدمة","الأساسيات","أنواع البيانات","العمليات","التفرع"],next:"التالي ›",last:"النتيجة ›",back:"‹ السابق",ok:"إجابة صحيحة",no:"إجابة غلط",ca:"الإجابة",th:"نظري",co:"كود",ex:"امتحان",rw:"أعيد الأسئلة الغلط بس",rs:"مسح التقدم",qn:"عدد الأسئلة",qd:"بنختار الأهم، موزعين على الخمس محاضرات",sub:n=>`أهم ${n} سؤال متوقعين في الميدترم · بنفس ترتيب المحاضرات`,wr:"الغلط"}};
+const T={en:{all:"All",ln:["Intro","Syntax","Data Types","Operators","Branching"],next:"Next ›",last:"Results ›",back:"‹ Back",ok:"Correct",no:"Wrong",ca:"Answer",th:"THEORY",co:"CODE",ex:"EXAM",rw:"Retry wrong only",rs:"Reset progress",qn:"Number of questions",shf:"Random order",qd:"Top picks by importance, spread across all 5 lectures",sub:n=>`${n} expected midterm questions · same order as the lectures`,wr:"Wrong"},
+ar:{all:"الكل",ln:["مقدمة","الأساسيات","أنواع البيانات","العمليات","التفرع"],next:"التالي ›",last:"النتيجة ›",back:"‹ السابق",ok:"إجابة صحيحة",no:"إجابة غلط",ca:"الإجابة",th:"نظري",co:"كود",ex:"امتحان",rw:"أعيد الأسئلة الغلط بس",rs:"مسح التقدم",qn:"عدد الأسئلة",shf:"ترتيب عشوائي",qd:"بنختار الأهم، موزعين على الخمس محاضرات",sub:n=>`أهم ${n} سؤال متوقعين في الميدترم · بنفس ترتيب المحاضرات`,wr:"الغلط"}};
 let S={m:"quiz",f:0,i:0,lang:"en",ids:[]},P={};
 try{P=JSON.parse(localStorage.cs70||"{}")}catch(e){}
 const save=()=>{try{localStorage.cs70=JSON.stringify(P)}catch(e){}};
@@ -118,9 +118,12 @@ function mk(n){const L=[1,2,3,4,5].map(l=>D.filter(q=>q.l==l)),raw=L.map(a=>a.le
  raw.map((r,i)=>[r-b[i],i]).sort((p,q)=>q[0]-p[0]).slice(0,n-b.reduce((p,q)=>p+q,0)).forEach(r=>b[r[1]]++);
  const ids=new Set();L.forEach((a,i)=>a.slice().sort((p,q)=>q.w-p.w||p.id-q.id).slice(0,b[i]).forEach(q=>ids.add(q.id)));return ids}
 let PL=mk(NQ);
-const qc=(t,N)=>`<div class=qc><div class=qh><b>${t.qn}</b><span class=qv id=qv>${N}</span></div><div class=qr><button data-n=${N-1} aria-label="-1">−</button><input type=range id=qs min=${MIN} max=${MAX} value=${N} aria-label="${t.qn}"><button data-n=${N+1} aria-label="+1">+</button></div><div class=qk>${[30,40,50,60,70].map(v=>`<button data-n=${v}${v==N?" class=on":""}>${v}</button>`).join("")}</div><p class=sub style="margin:8px 0 0">${t.qd}</p><div class=qw id=qw${N<30?"":" hidden"}>كدا هتشيل المادة يسطا🙂</div></div>`;
+let SH=false,RK=D.map(()=>Math.random());try{SH=localStorage.cs70s=="1"}catch(e){}
+function toggleSH(){SH=!SH;RK=D.map(()=>Math.random());try{localStorage.cs70s=SH?1:0}catch(e){}const k=set().findIndex(q=>P[q.id]===undefined);S.i=k<0?0:k;render(1)}
+const warn=v=>v<15?"انت اي اللي جابك هنا؟":v<20?"انت كدا فعلا ناوي تشيلها بق":v<30?"هتشيل المادة يسطا 🙃":"";
+const qc=(t,N)=>`<div class=qc><div class=qk style="margin-bottom:10px"><button data-a=shuf${SH?" class=on":""}>🔀 ${t.shf}</button></div><div class=qh><b>${t.qn}</b><span class=qv id=qv>${N}</span></div><div class=qr><button data-n=${N-1} aria-label="-1">−</button><input type=range id=qs min=${MIN} max=${MAX} value=${N} aria-label="${t.qn}"><button data-n=${N+1} aria-label="+1">+</button></div><div class=qk>${[30,40,50,60,70].map(v=>`<button data-n=${v}${v==N?" class=on":""}>${v}</button>`).join("")}</div><p class=sub style="margin:8px 0 0">${t.qd}</p><div class=qw id=qw${N<30?"":" hidden"}>${warn(N)}</div></div>`;
 function setN(v){v=Math.min(MAX,Math.max(MIN,Math.round(v)||MAX));NQ=v;try{localStorage.cs70n=v}catch(e){}PL=mk(v);if(S.f==="w")S.f=0;const k=set().findIndex(q=>P[q.id]===undefined);S.i=k<0?0:k;render(1)}
-const isOk=q=>P[q.id]===q.o[0],set=()=>D.filter(q=>PL.has(q.id)&&(S.f==="w"?S.ids.includes(q.id):S.f?q.l==S.f:1));
+const isOk=q=>P[q.id]===q.o[0],set=()=>{const a=D.filter(q=>PL.has(q.id)&&(S.f==="w"?S.ids.includes(q.id):S.f?q.l==S.f:1));return SH?a.sort((p,q)=>RK[p.id]-RK[q.id]):a};
 const code=q=>`<pre${q.st?` style="counter-reset:n ${q.st-1}"`:""}>${q.k.split("\n").map(l=>`<span>${hl(l)||" "}</span>`).join("")}</pre>`;
 function card(q,rev){
  const t=T[S.lang],ch=P[q.id],done=ch!==undefined||rev,ok=ch===q.o[0],ex=S.lang=="ar"?(q.ar||q.en):(q.en||q.ar);
@@ -149,11 +152,12 @@ ${qc(t,PL.size)}<div class=chs>${chip(0,t.all,"var(--ac)")}${[1,2,3,4,5].map(l=>
  if(!keep)scrollTo(0,0)}
 const pick=j=>{if(S.m!="quiz")return;const q=set()[S.i];if(!q||P[q.id]!==undefined||!q.opts[j])return;P[q.id]=q.opts[j][0];save();render(1);const f=$(".fb");f&&f.scrollIntoView({block:"nearest",behavior:"smooth"})};
 const go=d=>{const n=set().length,i=S.i+d;if(i>=0&&i<=n){S.i=i;render()}};
-$("#app").oninput=e=>{if(e.target.id=="qs"){const v=+e.target.value;$("#qv").textContent=v;$("#qw").hidden=v>=30}};
+$("#app").oninput=e=>{if(e.target.id=="qs"){const v=+e.target.value;$("#qv").textContent=v;$("#qw").hidden=v>=30;$("#qw").textContent=warn(v)}};
 $("#app").onchange=e=>{if(e.target.id=="qs")setN(+e.target.value)};
 $("#app").onclick=e=>{
  const b=e.target.closest("button");if(!b)return;const d=b.dataset;
- if(d.n!==undefined)setN(+d.n);
+ if(d.a==="shuf")toggleSH();
+ else if(d.n!==undefined)setN(+d.n);
  else if(d.o!==undefined)pick(+d.o);
  else if(d.k!==undefined){S.i=+d.k;render()}
  else if(d.f!==undefined){S.f=d.f==="w"?"w":+d.f;const k=set().findIndex(q=>P[q.id]===undefined);S.i=k<0?0:k;render()}
